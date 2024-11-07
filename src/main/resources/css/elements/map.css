@@ -1,0 +1,42 @@
+.map-border {
+    -fx-border-width: 0px;
+    -fx-border-color: #1f1f1f;
+
+    -fx-text-fill: #1f1f1f;
+}
+
+.map-border-cell {
+    -fx-border-width: 0.25;
+    -fx-border-color: #1f1f1f;
+}
+
+.map-border-top { -fx-border-width: 1px 0 0 0; }
+.map-border-top-right { -fx-border-width: 1px 1px 0 0; }
+.map-border-top-right-bottom { -fx-border-width: 1px 1px 1px 0; }
+.map-border-top-right-bottom-left { -fx-border-width: 1px 1px 1px 1px; }
+.map-border-right { -fx-border-width: 0 1px 0 0; }
+.map-border-right-bottom { -fx-border-width: 0 1px 1px 0; }
+.map-border-right-bottom-left { -fx-border-width: 0 1px 1px 1px; }
+.map-border-bottom { -fx-border-width: 0 0 1px 0; }
+.map-border-bottom-left { -fx-border-width: 0 0 1px 1px; }
+
+.map-border-cell-right { -fx-border-width: 0.25 1 0.25 0.25; }
+.map-border-cell-right-bottom { -fx-border-width: 0.25 1 1 0.25; }
+.map-border-cell-bottom { -fx-border-width: 0.25 0.25 1 0.25; }
+
+.map-cell-hover {
+    -fx-background-color: rgba(64, 64, 64, 0.53);
+}
+
+.map-timer-label {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.map-cell-ship {
+    -fx-background-color: black;
+}
+
+.map-cell-ship-selected {
+    -fx-background-color: #333333;
+}

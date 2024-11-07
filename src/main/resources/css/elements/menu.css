@@ -1,0 +1,9 @@
+.name-game {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.by-game {
+    -fx-font-size: 15px;
+    -fx-font-style: italic;
+}
