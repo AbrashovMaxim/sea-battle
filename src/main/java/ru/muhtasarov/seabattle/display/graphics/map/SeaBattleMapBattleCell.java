@@ -7,9 +7,12 @@ import ru.muhtasarov.seabattle.display.graphics.ship.SeaBattleShipBattle;
 public class SeaBattleMapBattleCell extends Pane implements SeaBattleMapCell {
 
     private SeaBattleShipBattle ship;
+    private boolean isStrike;
 
 
-    public SeaBattleMapBattleCell() { }
+    public SeaBattleMapBattleCell() {
+        isStrike = false;
+    }
 
 
     @Override
@@ -25,5 +28,13 @@ public class SeaBattleMapBattleCell extends Pane implements SeaBattleMapCell {
     @Override
     public void setShip(SeaBattleShip ship) {
         this.ship = (SeaBattleShipBattle) ship;
+    }
+
+    public boolean isStrike() {
+        return isStrike;
+    }
+
+    public void setStrike(boolean strike) {
+        isStrike = strike;
     }
 }

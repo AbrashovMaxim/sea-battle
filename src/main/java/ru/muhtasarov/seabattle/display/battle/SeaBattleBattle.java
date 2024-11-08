@@ -11,4 +11,6 @@ public interface SeaBattleBattle {
 
     void startBattle(SeaBattleMapBattle userMap, SeaBattleMapBattle botMap);
 
+    void setHod(boolean isUser);
+
 }

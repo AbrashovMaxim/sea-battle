@@ -2,6 +2,8 @@ package ru.muhtasarov.seabattle;
 
 import ru.muhtasarov.seabattle.bot.SeaBattleBot;
 import ru.muhtasarov.seabattle.bot.SeaBattleBotCallback;
+import ru.muhtasarov.seabattle.bot.typeBots.SeaBattleBotAbstract;
+import ru.muhtasarov.seabattle.core.SeaBattleBotVariant;
 import ru.muhtasarov.seabattle.display.SeaBattleDisplay;
 import ru.muhtasarov.seabattle.display.SeaBattleDisplayCallback;
 
@@ -30,5 +32,10 @@ public final class  SeaBattleLogic
         bot.initialize();
 
         display.initialize();
+    }
+
+    @Override
+    public SeaBattleBotAbstract callDisplayGetBot(SeaBattleBotVariant variant) {
+        return bot.getSelectedBot(variant);
     }
 }

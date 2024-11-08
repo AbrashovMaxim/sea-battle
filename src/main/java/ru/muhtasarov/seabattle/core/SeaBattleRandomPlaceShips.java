@@ -1,6 +1,5 @@
 package ru.muhtasarov.seabattle.core;
 
-import javafx.scene.Node;
 import ru.muhtasarov.seabattle.display.graphics.map.SeaBattleMap;
 import ru.muhtasarov.seabattle.display.graphics.map.SeaBattleMapCell;
 import ru.muhtasarov.seabattle.display.graphics.ship.SeaBattleShip;

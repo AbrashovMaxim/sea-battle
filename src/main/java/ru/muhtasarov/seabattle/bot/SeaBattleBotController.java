@@ -13,9 +13,7 @@ public final class  SeaBattleBotController
 
     private final SeaBattleBotCallback callback;
 
-    private SeaBattleBotType selectedBot;
-
-    private Map<SeaBattleBotVariant, SeaBattleBotType> typeBots;
+    private Map<SeaBattleBotVariant, SeaBattleBotAbstract> typeBots;
 
 
     public SeaBattleBotController(SeaBattleBotCallback callback) {
@@ -26,12 +24,18 @@ public final class  SeaBattleBotController
     @Override
     public void initialize() {
         typeBots = new HashMap<>();
-        typeBots.put(SeaBattleBotVariant.EASY, new SeaBattleBotEasy(this));
-        typeBots.put(SeaBattleBotVariant.MEDIUM, new SeaBattleBotMedium(this));
-        typeBots.put(SeaBattleBotVariant.HARD, new SeaBattleBotHard(this));
+        typeBots.put(SeaBattleBotVariant.EASY, new SeaBattleBotEasy());
+        typeBots.put(SeaBattleBotVariant.MEDIUM, new SeaBattleBotMedium());
+        typeBots.put(SeaBattleBotVariant.HARD, new SeaBattleBotHard());
 
         for (SeaBattleBotVariant variant : typeBots.keySet()) typeBots.get(variant).initialize();
 
+    }
+
+
+    @Override
+    public SeaBattleBotAbstract getSelectedBot(SeaBattleBotVariant variant) {
+        return typeBots.get(variant);
     }
 
 }

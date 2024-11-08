@@ -7,7 +7,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import ru.muhtasarov.seabattle.display.graphics.ship.SeaBattleShipBattle;
 import ru.muhtasarov.seabattle.display.graphics.ship.SeaBattleShipDraw;
+
+import java.util.HashMap;
 
 import static ru.muhtasarov.seabattle.core.SeaBattleSettings.*;
 
@@ -42,8 +45,8 @@ public class SeaBattleMapEditable extends GridPane implements SeaBattleMap {
                         if (event.getButton().equals(MouseButton.SECONDARY) && !callback.callMapIsSelectedShip() && cell.isBusy()) {
                             SeaBattleShipDraw shipDraw = cell.getShip();
                             shipDraw.returnParent();
-                            for (int rowI = 1; rowI < mapCell.length; rowI++) {
-                                for (int colI = 1; colI < mapCell[rowI].length; colI++) {
+                            for (int rowI = 0; rowI < mapCell.length; rowI++) {
+                                for (int colI = 0; colI < mapCell[rowI].length; colI++) {
                                     if (mapCell[rowI][colI] instanceof SeaBattleMapEditableCell editableCell) {
                                         if (shipDraw.equals(editableCell.getShip())) {
                                             editableCell.setShip(null);
@@ -63,7 +66,13 @@ public class SeaBattleMapEditable extends GridPane implements SeaBattleMap {
                                 int rowIndex = GridPane.getRowIndex(node);
                                 int colIndex = GridPane.getColumnIndex(node);
                                 if (rowIndex == cellRowIndex || colIndex == cellColIndex) {
-                                    if (!node.getStyleClass().contains("map-cell-hover") && !node.getStyleClass().contains("map-cell-ship")) {
+                                    if (
+                                        !node.getStyleClass().contains("map-cell-hover") &&
+                                        !node.getStyleClass().contains("map-cell-ship") &&
+                                        !node.getStyleClass().contains("map-cell-strike-ship") &&
+                                        !node.getStyleClass().contains("map-cell-strike-null")
+
+                                    ) {
                                         node.getStyleClass().add("map-cell-hover");
                                     }
                                 }
@@ -91,6 +100,33 @@ public class SeaBattleMapEditable extends GridPane implements SeaBattleMap {
         for (Node node : this.getChildren()) {
             node.getStyleClass().remove("map-cell-hover");
         }
+    }
+
+
+    public SeaBattleMapBattle constructMap() {
+        SeaBattleMapBattle battleMapBattle = new SeaBattleMapBattle();
+        SeaBattleMapCell[][] cellMap = battleMapBattle.getCellMap();
+        HashMap<SeaBattleShipDraw, SeaBattleShipBattle> map = new HashMap<>();
+        for (int row = 0; row < mapCell.length; row++) {
+            for (int col = 0; col < mapCell[row].length; col++) {
+                if (mapCell[row][col] instanceof SeaBattleMapEditableCell cell) {
+                    if (cell.getShip() == null) continue;
+
+                    SeaBattleShipBattle ship;
+                    if (map.containsKey(cell.getShip())) {
+                        ship = map.get(cell.getShip());
+                    } else {
+                        ship = new SeaBattleShipBattle(cell.getShip().getCountDecks());
+                        map.put(cell.getShip(), ship);
+                    }
+                    SeaBattleMapBattleCell battleCell = (SeaBattleMapBattleCell) cellMap[row][col];
+                    battleCell.getStyleClass().add("map-cell-ship");
+                    battleCell.setShip(ship);
+                }
+            }
+        }
+
+        return battleMapBattle;
     }
 
 

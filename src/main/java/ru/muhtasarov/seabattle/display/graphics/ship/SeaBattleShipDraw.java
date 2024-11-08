@@ -50,6 +50,8 @@ public class SeaBattleShipDraw extends GridPane implements SeaBattleShip {
 
 
     public void returnParent() {
-        if (!parent.getChildren().contains(this)) parent.getChildren().add(this);
+        if (!parent.getChildren().contains(this)) {
+            parent.getChildren().add(this);
+        }
     }
 }

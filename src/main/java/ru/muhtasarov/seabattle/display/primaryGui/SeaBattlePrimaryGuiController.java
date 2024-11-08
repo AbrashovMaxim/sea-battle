@@ -1,12 +1,9 @@
 package ru.muhtasarov.seabattle.display.primaryGui;
 
-import javafx.event.EventType;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import ru.muhtasarov.seabattle.core.SeaBattleJavaFX;
 
 public final class SeaBattlePrimaryGuiController implements SeaBattlePrimaryGui {
 
@@ -23,9 +20,6 @@ public final class SeaBattlePrimaryGuiController implements SeaBattlePrimaryGui 
     @Override
     public void initialize() {
         primaryPane = new AnchorPane();
-        primaryPane.addEventFilter(EventType.ROOT, event -> {
-
-        });
 
         Scene scene = new Scene(primaryPane);
         scene.getStylesheets().add(this.getClass().getResource("/css/style.css").toExternalForm());
@@ -34,6 +28,7 @@ public final class SeaBattlePrimaryGuiController implements SeaBattlePrimaryGui 
         stage.setScene(scene);
         stage.setMinHeight(200);
         stage.setMinWidth(400);
+        stage.setOnCloseRequest(event -> callback.callPrimaryReleased());
         stage.show();
     }
 

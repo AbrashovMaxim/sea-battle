@@ -9,6 +9,7 @@ import javafx.scene.layout.RowConstraints;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static ru.muhtasarov.seabattle.core.SeaBattleSettings.*;
@@ -18,11 +19,13 @@ public class SeaBattleMapBattle extends GridPane implements SeaBattleMap {
     private final SeaBattleMapCell[][] mapCell;
     private final List<Consumer<Node>> consumerClickList;
 
+    private final AtomicBoolean isCanStrike;
+
 
     public SeaBattleMapBattle() {
-
         consumerClickList = new ArrayList<>();
         mapCell = new SeaBattleMapCell[SIZE_MAP - 1][SIZE_MAP - 1];
+        isCanStrike = new AtomicBoolean(false);
 
         for (int i = 0; i < SIZE_MAP; i++) {
             this.getColumnConstraints().add(new ColumnConstraints(25));
@@ -43,7 +46,11 @@ public class SeaBattleMapBattle extends GridPane implements SeaBattleMap {
                     this.add(borderPane, col, row);
                 } else {
                     SeaBattleMapBattleCell cell = new SeaBattleMapBattleCell();
-                    cell.setOnMouseClicked(event -> consumerClickList.forEach(clickEvent -> clickEvent.accept(cell)));
+                    cell.setOnMouseClicked(event -> {
+                        if (isCanStrike.get()) {
+                            consumerClickList.forEach(clickEvent -> clickEvent.accept(cell));
+                        }
+                    });
                     cell.hoverProperty().addListener((obs, oldV, newV) -> {
                         if (newV) {
                             int cellRowIndex = GridPane.getRowIndex(cell);
@@ -68,7 +75,7 @@ public class SeaBattleMapBattle extends GridPane implements SeaBattleMap {
                     if (row == 10 || col == 10) {
                         cell.getStyleClass().add("map-border-cell" + (col == 10 ? "-right" : "") + (row == 10 ? "-bottom" : ""));
                     }
-                    mapCell[row][col] = cell;
+                    mapCell[row - 1][col - 1] = cell;
 
                     this.add(cell, col, row);
                 }
@@ -87,6 +94,15 @@ public class SeaBattleMapBattle extends GridPane implements SeaBattleMap {
         for (Node node : this.getChildren()) {
             node.getStyleClass().remove("map-cell-hover");
         }
+    }
+
+
+    public boolean getIsCanStrike() {
+        return isCanStrike.get();
+    }
+
+    public void setIsCanStrike(boolean isCanStrike) {
+        this.isCanStrike.set(isCanStrike);
     }
 
 

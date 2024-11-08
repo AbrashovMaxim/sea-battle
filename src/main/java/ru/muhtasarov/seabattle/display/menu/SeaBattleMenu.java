@@ -6,6 +6,8 @@ public interface SeaBattleMenu {
 
     void initialize();
 
+    void reset();
+
     Node getGui();
 
 }

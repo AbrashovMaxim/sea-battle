@@ -1,6 +1,8 @@
 package ru.muhtasarov.seabattle.display.menu;
 
+import javafx.beans.InvalidationListener;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -24,7 +26,7 @@ import static ru.muhtasarov.seabattle.core.SeaBattleSettings.SIZE_MAP;
 public final class  SeaBattleMenuController
         implements  SeaBattleMenu,
                     SeaBattleShipDrawCallback,
-        SeaBattleMapEditableCallback
+                    SeaBattleMapEditableCallback
 {
 
     private final SeaBattleMenuCallback callback;
@@ -38,9 +40,12 @@ public final class  SeaBattleMenuController
 
     private SeaBattleBotVariant botVariant;
     private SeaBattleMapEditable shipsPlaceMap;
+    private List<SeaBattleShipDraw> shipDrawList;
 
     private VBox shipsLeftPart;
     private VBox shipsRightPart;
+
+    private BorderPane nextPlacementBorderPane;
 
     private SeaBattleShipDraw selectedShip;
     private boolean isRotate;
@@ -76,6 +81,58 @@ public final class  SeaBattleMenuController
 
     }
 
+
+    @Override
+    public void reset() {
+        shipsLeftPart.getChildren().clear();
+        shipsRightPart.getChildren().clear();
+
+        shipDrawList.forEach(SeaBattleShipDraw::returnParent);
+
+        SeaBattleMapCell[][] cellList = shipsPlaceMap.getCellMap();
+        for (int row = 0; row < cellList.length; row++) {
+            for (int col = 0; col < cellList[row].length; col++) {
+                if (cellList[row][col] instanceof SeaBattleMapEditableCell cell) {
+                    cell.setShip(null);
+                    cell.getStyleClass().remove("map-cell-ship");
+                }
+            }
+        }
+
+        shipPlacementVBox.getChildren().remove(nextPlacementBorderPane);
+
+        botVariant = null;
+
+        primaryAnchorPane.getChildren().setAll(startMenuVBox);
+    }
+
+
+    @Override
+    public Node getGui() {
+        return primaryPane;
+    }
+
+
+    @Override
+    public void callShipDrawSetSelectedShip(SeaBattleShipDraw selectedShip) {
+        if (this.selectedShip != null) {
+            this.selectedShip.getStyleClass().remove("map-cell-ship-selected");
+        }
+        this.selectedShip = selectedShip;
+        isRotate = false;
+    }
+
+    @Override
+    public void callShipDrawRemoveSelectedShip(SeaBattleShipDraw selectedShip) {
+        if (this.selectedShip.equals(selectedShip)) {
+            this.selectedShip = null;
+        }
+        isRotate = false;
+    }
+
+    /**
+     * Инициализация базового меню
+     */
     private void initializeBaseMenu() {
         Pane emptyPaneOne = new StackPane();
         VBox.setVgrow(emptyPaneOne, Priority.ALWAYS);
@@ -105,6 +162,9 @@ public final class  SeaBattleMenuController
         startMenuVBox.getChildren().addAll(emptyPaneOne, nameBorderPane, byGameBorderPane, startGameBorderPane, emptyPaneTwo);
     }
 
+    /**
+     * Инициализация выбора сложности
+     */
     private void initializeDifficultyMenu() {
         Pane emptyPaneThree = new StackPane();
         VBox.setVgrow(emptyPaneThree, Priority.ALWAYS);
@@ -147,6 +207,9 @@ public final class  SeaBattleMenuController
         startGameVBox.getChildren().addAll(emptyPaneThree, selectDifficultBorderPane, difficultBoxBorderPane, backDifficultBorderPane, emptyPaneFour);
     }
 
+    /**
+     * Инициализация растановки кораблей
+     */
     private void initializeShipPlaceMenu() {
         Pane emptyPaneFive = new StackPane();
         VBox.setVgrow(emptyPaneFive, Priority.ALWAYS);
@@ -183,24 +246,24 @@ public final class  SeaBattleMenuController
 
         shipsLeftPart = new VBox();
         shipsLeftPart.setSpacing(5);
+        shipsLeftPart.setMinWidth(25);
 
         shipsRightPart = new VBox();
         shipsRightPart.setSpacing(5);
+        shipsRightPart.setMinWidth(25);
 
-        SeaBattleShipDraw oneShip1 = new SeaBattleShipDraw(this, 1, shipsRightPart);
-        SeaBattleShipDraw oneShip2 = new SeaBattleShipDraw(this, 1, shipsLeftPart);
-        SeaBattleShipDraw oneShip3 = new SeaBattleShipDraw(this, 1, shipsLeftPart);
-        SeaBattleShipDraw oneShip4 = new SeaBattleShipDraw(this, 1, shipsLeftPart);
-
-        SeaBattleShipDraw twoShip1 = new SeaBattleShipDraw(this, 2, shipsLeftPart);
-        SeaBattleShipDraw twoShip2 = new SeaBattleShipDraw(this, 2, shipsLeftPart);
-        SeaBattleShipDraw twoShip3 = new SeaBattleShipDraw(this, 2, shipsRightPart);
-
-        SeaBattleShipDraw threeShip1 = new SeaBattleShipDraw(this, 3, shipsLeftPart);
-        SeaBattleShipDraw threeShip2 = new SeaBattleShipDraw(this, 3, shipsRightPart);
-
-        SeaBattleShipDraw fourShip1 = new SeaBattleShipDraw(this, 4, shipsRightPart);
-
+        shipDrawList = new ArrayList<>(List.of(
+                new SeaBattleShipDraw(this, 1, shipsRightPart),
+                new SeaBattleShipDraw(this, 1, shipsLeftPart),
+                new SeaBattleShipDraw(this, 1, shipsLeftPart),
+                new SeaBattleShipDraw(this, 1, shipsLeftPart),
+                new SeaBattleShipDraw(this, 2, shipsLeftPart),
+                new SeaBattleShipDraw(this, 2, shipsLeftPart),
+                new SeaBattleShipDraw(this, 2, shipsRightPart),
+                new SeaBattleShipDraw(this, 3, shipsLeftPart),
+                new SeaBattleShipDraw(this, 3, shipsRightPart),
+                new SeaBattleShipDraw(this, 4, shipsRightPart)
+        ));
 
         shipPlacementHBox.getChildren().addAll(shipsLeftPart, shipsPlaceMap, shipsRightPart);
 
@@ -208,8 +271,7 @@ public final class  SeaBattleMenuController
         randomPlacementButton.getStyleClass().add("gui-button");
         randomPlacementButton.setOnAction(event -> {
             selectedShip = null;
-            List<SeaBattleShip> ships = new ArrayList<>(List.of(fourShip1, threeShip1, threeShip2, twoShip1, twoShip2, twoShip3, oneShip1, oneShip2, oneShip3, oneShip4));
-            for (SeaBattleShip ship : ships) {
+            for (SeaBattleShip ship : shipDrawList) {
                 SeaBattleShipDraw shipDraw = (SeaBattleShipDraw) ship;
                 shipDraw.returnParent();
                 shipDraw.getStyleClass().remove("map-cell-ship-selected");
@@ -223,7 +285,8 @@ public final class  SeaBattleMenuController
                     }
                 }
             }
-            SeaBattleRandomPlaceShips.placeShips(shipsPlaceMap, ships);
+            List<SeaBattleShip> shipList = shipDrawList.stream().map(ship -> (SeaBattleShip) ship).toList();
+            SeaBattleRandomPlaceShips.placeShips(shipsPlaceMap, shipList);
             cellsArrayFromMap = shipsPlaceMap.getCellMap();
             for (int row = 0; row < cellsArrayFromMap.length; row++) {
                 for (int col = 0; col < cellsArrayFromMap[row].length; col++) {
@@ -241,12 +304,43 @@ public final class  SeaBattleMenuController
         randomPlacementBorderPane.setCenter(randomPlacementButton);
         VBox.setVgrow(randomPlacementBorderPane, Priority.NEVER);
 
+        Button nextPlacementButton = new Button("Начать игру");
+        nextPlacementButton.getStyleClass().addAll("gui-button", "gui-button-green");
+        nextPlacementButton.setOnAction(event -> {
+            callback.callMenuStartBattle(botVariant, shipsPlaceMap.constructMap());
+            primaryAnchorPane.getChildren().setAll(startGameVBox);
+        });
+        nextPlacementBorderPane = new BorderPane();
+        nextPlacementBorderPane.setCenter(nextPlacementButton);
+        VBox.setVgrow(nextPlacementBorderPane, Priority.NEVER);
+
+        shipsRightPart.getChildren().addListener((InvalidationListener) observable -> {
+            if (shipsLeftPart.getChildren().isEmpty() && shipsRightPart.getChildren().isEmpty()) {
+                if (!shipPlacementVBox.getChildren().contains(nextPlacementBorderPane)) {
+                    shipPlacementVBox.getChildren().add(shipPlacementVBox.getChildren().size() - 2, nextPlacementBorderPane);
+                }
+            } else {
+                shipPlacementVBox.getChildren().remove(nextPlacementBorderPane);
+            }
+        });
+
+        shipsLeftPart.getChildren().addListener((InvalidationListener) observable -> {
+            if (shipsLeftPart.getChildren().isEmpty() && shipsRightPart.getChildren().isEmpty()) {
+                if (!shipPlacementVBox.getChildren().contains(nextPlacementBorderPane)) {
+                    shipPlacementVBox.getChildren().add(shipPlacementVBox.getChildren().size() - 2, nextPlacementBorderPane);
+                }
+            } else {
+                shipPlacementVBox.getChildren().remove(nextPlacementBorderPane);
+            }
+        });
+
         Button backPlacementButton = new Button("Назад");
         backPlacementButton.getStyleClass().add("gui-button");
         backPlacementButton.setOnAction(event -> primaryAnchorPane.getChildren().setAll(startGameVBox));
         BorderPane backPlacementBorderPane = new BorderPane();
         backPlacementBorderPane.setCenter(backPlacementButton);
         VBox.setVgrow(backPlacementBorderPane, Priority.NEVER);
+        VBox.setMargin(backPlacementBorderPane, new Insets(5));
 
         Pane emptyPaneSix = new StackPane();
         VBox.setVgrow(emptyPaneSix, Priority.ALWAYS);
@@ -254,32 +348,10 @@ public final class  SeaBattleMenuController
         shipPlacementVBox.getChildren().addAll(emptyPaneFive, shipPlacementBorderPane, shipPlacementHBox, randomPlacementBorderPane, backPlacementBorderPane, emptyPaneSix);
     }
 
-    @Override
-    public Node getGui() {
-        return primaryPane;
-    }
-
-
-    @Override
-    public void callShipDrawSetSelectedShip(SeaBattleShipDraw selectedShip) {
-        if (this.selectedShip != null) {
-            this.selectedShip.getStyleClass().remove("map-cell-ship-selected");
-        }
-        this.selectedShip = selectedShip;
-        isRotate = false;
-    }
-
-    @Override
-    public void callShipDrawRemoveSelectedShip(SeaBattleShipDraw selectedShip) {
-        if (this.selectedShip.equals(selectedShip)) {
-            this.selectedShip = null;
-        }
-        isRotate = false;
-    }
-
     private void callShipDrawCheckLineUnderMapCells(SeaBattleCoord mouseCoord, int countDecks) {
         shipsPlaceMap.clearHover();
 
+        // Создаем линию по ( 25 * ( кол-во палуб / 2 ) ) пикселей влево и вправо ( если повернули корабль ), иначе вверх и вниз
         double value = ((double) countDecks / 2) * 25;
 
         double startX = isRotate ? mouseCoord.getX() - value : mouseCoord.getX();
@@ -290,6 +362,8 @@ public final class  SeaBattleMenuController
 
         List<SeaBattleMapEditableCell> cellsDrawArray = new ArrayList<>();
         SeaBattleMapCell[][] cellsArrayFromMap = shipsPlaceMap.getCellMap();
+
+        // Проходимся по всем ячейкам и проверяем, находится ли наша линия на этих ячейках и свободны ли они
         for (int row = 0; row < cellsArrayFromMap.length; row++) {
             for (int col = 0; col < cellsArrayFromMap[row].length; col++) {
                 if (cellsArrayFromMap[row][col] instanceof SeaBattleMapEditableCell cell) {
@@ -305,10 +379,12 @@ public final class  SeaBattleMenuController
 
         if (cellsDrawArray.size() != countDecks) return;
 
+
+        // Получаем минимальную ячейку и максимальную
         int minRow = Math.max(0, GridPane.getRowIndex(cellsDrawArray.getFirst()) - 2);
         int minCol = Math.max(0, GridPane.getColumnIndex(cellsDrawArray.getFirst()) - 2);
-        int maxRow = Math.min(SIZE_MAP - 1, GridPane.getRowIndex(cellsDrawArray.getLast()));
-        int maxCol = Math.min(SIZE_MAP - 1, GridPane.getColumnIndex(cellsDrawArray.getLast()));
+        int maxRow = Math.min(SIZE_MAP - 1, GridPane.getRowIndex(cellsDrawArray.getLast()) + 1);
+        int maxCol = Math.min(SIZE_MAP - 1, GridPane.getColumnIndex(cellsDrawArray.getLast()) + 1);
 
         for (int row = minRow; row < maxRow; row++) {
             for (int col = minCol; col < maxCol; col++) {
@@ -318,14 +394,21 @@ public final class  SeaBattleMenuController
             }
         }
 
+        // Проходимся по всем ячейкам и делаем им HOVER ( то есть, что эти ячейки выбраны для корабля )
         for (SeaBattleMapEditableCell cell : cellsDrawArray) {
             if (!cell.getStyleClass().contains("map-cell-hover")) cell.getStyleClass().add("map-cell-hover");
         }
     }
 
+    /**
+     * Накладывает корабль на карту
+     * @param shipDraw Корабль
+     */
     public void callShipPlaceShipOnMap(SeaBattleShipDraw shipDraw) {
         List<SeaBattleMapEditableCell> cellsDrawArray = new ArrayList<>();
         SeaBattleMapCell[][] cellsArrayFromMap = shipsPlaceMap.getCellMap();
+
+        // Проходимся по всем ячейкам, и те, у которых HOVER - накладываем туда наш корабль
         for (int row = 0; row < cellsArrayFromMap.length; row++) {
             for (int col = 0; col < cellsArrayFromMap[row].length; col++) {
                 if (cellsArrayFromMap[row][col] instanceof SeaBattleMapEditableCell cell) {
@@ -336,31 +419,48 @@ public final class  SeaBattleMenuController
             }
         }
 
+        // Если ячеек не столько, сколько у корябля палуб - то не накладываем
         if (cellsDrawArray.size() != shipDraw.getCountDecks()) return;
 
+        // Удаляем корабль из боковых панелей
         shipsLeftPart.getChildren().remove(shipDraw);
         shipsRightPart.getChildren().remove(shipDraw);
 
+        // Проходимся по списку и накладываем корабль
         for (SeaBattleMapEditableCell cell : cellsDrawArray) {
             cell.getStyleClass().remove("map-cell-hover");
             cell.getStyleClass().add("map-cell-ship");
             cell.setShip(selectedShip);
         }
 
+        // Убираем выбор текущего корабля
         if (selectedShip.equals(shipDraw)) {
             selectedShip.getStyleClass().remove("map-cell-ship-selected");
             selectedShip = null;
         }
     }
 
-    private boolean doesLineIntersectRectangle(double x1, double y1, double x2, double y2, double rx0, double ry0, double rx1, double ry1) {
-        return intersects(x1, y1, x2, y2, rx0, ry0, rx1, ry0) || // верхняя грань
-                intersects(x1, y1, x2, y2, rx1, ry0, rx1, ry1) || // правая грань
-                intersects(x1, y1, x2, y2, rx1, ry1, rx0, ry1) || // нижняя грань
-                intersects(x1, y1, x2, y2, rx0, ry1, rx0, ry0) || // левая грань
-                (x1 >= rx0 && x1 <= rx1 && y1 >= ry0 && y1 <= ry1) || // начальная точка внутри
-                (x2 >= rx0 && x2 <= rx1 && y2 >= ry0 && y2 <= ry1);   // конечная точка внутри
+    /**
+     * Проверяет, находится ли линия внутри прямоугольника или пересекает ли его
+     * @param lineStartX Начало линии по X
+     * @param lineStartY Начало линии по Y
+     * @param lineEndX Конец линии по X
+     * @param lineEndY Конец линии по Y
+     * @param rectMinX Вверхняя левая граница прямоугольника по X
+     * @param rectMinY Вверхняя левая граница прямоугольника по Y
+     * @param rectMaxX Нижняя правая граница прямоугольника по X
+     * @param rectMaxY Нижняя правая граница прямоугольника по Y
+     * @return Если линия находится внутри или пересекает прямоугольник - True. Иначе - False
+     */
+    private boolean doesLineIntersectRectangle(double lineStartX, double lineStartY, double lineEndX, double lineEndY, double rectMinX, double rectMinY, double rectMaxX, double rectMaxY) {
+        return intersects(lineStartX, lineStartY, lineEndX, lineEndY, rectMinX, rectMinY, rectMaxX, rectMinY) || // верхняя грань
+                intersects(lineStartX, lineStartY, lineEndX, lineEndY, rectMaxX, rectMinY, rectMaxX, rectMaxY) || // правая грань
+                intersects(lineStartX, lineStartY, lineEndX, lineEndY, rectMaxX, rectMaxY, rectMinX, rectMaxY) || // нижняя грань
+                intersects(lineStartX, lineStartY, lineEndX, lineEndY, rectMinX, rectMaxY, rectMinX, rectMinY) || // левая грань
+                (lineStartX >= rectMinX && lineStartX <= rectMaxX && lineStartY >= rectMinY && lineStartY <= rectMaxY) || // начальная точка внутри
+                (lineEndX >= rectMinX && lineEndX <= rectMaxX && lineEndY >= rectMinY && lineEndY <= rectMaxY);   // конечная точка внутри
     }
+
 
     private boolean intersects(double x1, double y1, double x2, double y2,
                                       double x3, double y3, double x4, double y4) {

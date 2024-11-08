@@ -3,6 +3,10 @@
     -fx-font-weight: bold;
 }
 
+.podname-game {
+    -fx-font-size: 20px;
+}
+
 .by-game {
     -fx-font-size: 15px;
     -fx-font-style: italic;
